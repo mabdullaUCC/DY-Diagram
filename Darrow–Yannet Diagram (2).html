@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Darrow–Yannet Diagram</title>
+<style>
+:root{--bg:#fafaf8;--fg:#1f2328;--mute:#6b7280;--card:#fff;--line:#d9d9d4;--icf:#1d9e75;--ecf:#378add;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16181a;--fg:#e8e8e4;--mute:#9aa0a6;--card:#202326;--line:#3a3e42;--icf:#2fc496;--ecf:#5aa2f0}}
+:root[data-theme="dark"]{--bg:#16181a;--fg:#e8e8e4;--mute:#9aa0a6;--card:#202326;--line:#3a3e42;--icf:#2fc496;--ecf:#5aa2f0}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding:16px}
+.wrap{max-width:1300px;margin:0 auto}.layout{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:12px;align-items:start}.left{position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px)}@media(max-width:900px){.layout{grid-template-columns:1fr}.left{position:static}}
+h1{font-size:20px;margin:0 0 4px}
+p.sub{margin:0 0 14px;color:var(--mute);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+svg{width:100%;height:auto;display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}}
+.ctl h2{font-size:14px;margin:0 0 8px}
+.row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+.row label{width:96px;color:var(--mute)}
+.row input[type=range]{flex:1;min-width:0}
+.row output{width:78px;text-align:right;font-variant-numeric:tabular-nums}
+.icf h2{color:var(--icf)}.ecf h2{color:var(--ecf)}
+.icf input{accent-color:var(--icf)}.ecf input{accent-color:var(--ecf)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;font-size:13px;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+button:hover{border-color:var(--mute)}
+button.p{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.stats{font-size:13px;color:var(--mute);margin-top:8px}
+.stats b{color:var(--fg);font-weight:600}
+.flow{font-weight:600}
+.blood{display:grid;grid-template-columns:1fr 1fr;gap:12px}.big{border:1px solid var(--line);border-radius:10px;padding:10px 12px}.big small{display:block;color:var(--mute);font-size:12px}.big .v{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}.big .n{font-size:12px;color:var(--mute)}.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}.chip{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:15px;font-weight:700;border:5px solid var(--line);border-radius:12px;padding:6px 12px;color:var(--fg)}.chip b{font-size:42px;line-height:1;font-weight:900}.up{border-color:#d85a30}.up b{color:#d85a30}.dn{border-color:var(--ecf)}.dn b{color:var(--ecf)}#dname{font-weight:600;margin-bottom:6px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Darrow–Yannet diagram</h1>
+<p class="sub">Width = compartment volume, height = osmolarity, area = total osmoles. Bold dotted outline = original control state. The y-axis is truncated.</p>
+
+<div class="layout"><div class="left"><div class="card"><svg id="svg" viewBox="0 0 520 340" role="img" aria-label="Darrow-Yannet diagram"></svg>
+<div class="stats" id="stats"></div></div>
+</div><div class="right">
+
+<div class="card"><div id="dname"></div>
+ <div class="blood">
+  <div class="big"><small>Plasma protein concentration</small><span class="v" id="bp"></span><span class="n"> g/dL (normal 7)</span></div>
+  <div class="big"><small>Hematocrit</small><span class="v" id="bh"></span><span class="n"> % (normal 45)</span></div>
+ </div>
+ <div class="chips" id="chips"></div>
+ <div class="stats">Protein does not cross the capillary wall, so its concentration varies inversely with ECF volume. Hematocrit reflects RBC volume (follows ICF volume) relative to plasma volume (a fixed fraction of ECF volume).</div>
+</div>
+
+<div class="grid">
+ <div class="card ctl icf"><h2>Intracellular fluid (ICF)</h2>
+  <div class="row"><label>Volume</label><input type="range" id="vi" min="5" max="40" step="0.1"><output id="vio"></output></div>
+  <div class="row"><label>Osmolarity</label><input type="range" id="oi" min="230" max="350" step="1"><output id="oio"></output></div>
+ </div>
+ <div class="card ctl ecf"><h2>Extracellular fluid (ECF)</h2>
+  <div class="row"><label>Volume</label><input type="range" id="ve" min="2" max="30" step="0.1"><output id="veo"></output></div>
+  <div class="row"><label>Osmolarity</label><input type="range" id="oe" min="230" max="350" step="1"><output id="oeo"></output></div>
+ </div>
+</div>
+
+<div class="card">
+ <div class="btns" style="margin-bottom:8px">
+  <button class="p" id="eq">Equilibrate (water shifts)</button>
+  <button id="reset">Reset to normal</button>
+ </div>
+ <div class="btns">
+  <span style="font-size:13px;color:var(--mute);align-self:center">Apply to ECF:</span>
+  <button data-p="iso">+2 L isotonic saline</button>
+  <button data-p="water">+2 L pure water</button>
+  <button data-p="salt">Add 600 mOsm NaCl</button>
+  <button data-p="diar">Isotonic loss (−2 L)</button>
+  <button data-p="sweat">Hypotonic loss (−1 L water)</button>
+ </div>
+ <div class="btns" style="margin-top:10px"><span style="font-size:13px;color:var(--mute);align-self:center">Body fluid disorders (start from normal, fully equilibrated):</span></div>
+ <div class="btns" style="margin-top:6px" id="dis">
+  <button data-d="diar">Diarrhea</button>
+  <button data-d="sweat">Sweating / water deprivation</button>
+  <button data-d="adrenal">Adrenal insufficiency</button>
+  <button data-d="isoexp">Isotonic saline infusion</button>
+  <button data-d="hyperexp">High NaCl intake</button>
+  <button data-d="siadh">SIADH</button>
+ </div>
+ <div class="stats" id="note">Tip: set up a change in the ECF, then press Equilibrate to see water move until both osmolarities match. Total osmoles in each compartment stay constant.</div>
+</div>
+</div></div>
+
+<script>
+var N={vi:25,oi:285,ve:15,oe:285};
+var S=Object.assign({},N);
+var X0=50,X1=470,Y0=20,Y1=290,XM=70,YMIN=230,YMAX=350;
+var XC=260,K=210/40;
+var sy=function(o){return Y1-(o-YMIN)/(YMAX-YMIN)*(Y1-Y0)};
+var svg=document.getElementById('svg'),NS='http://www.w3.org/2000/svg';
+function el(t,a,txt){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;svg.appendChild(e);return e}
+function draw(){
+ svg.innerHTML='';
+ var fg='var(--fg)',mu='var(--mute)',ln='var(--line)';
+ for(var o=240;o<=340;o+=20){el('line',{x1:X0,x2:X1,y1:sy(o),y2:sy(o),stroke:ln,'stroke-width':1});el('text',{x:XC-6,y:sy(o)+4,'text-anchor':'end','font-size':11,fill:mu,stroke:'var(--card)','stroke-width':3,'paint-order':'stroke'},o)}
+ for(var v=0;v<=40;v+=10){[-1,1].forEach(function(d){if(v==0&&d<0)return;var x=XC+d*v*K;el('line',{x1:x,x2:x,y1:Y1,y2:Y1+5,stroke:mu});el('text',{x:x,y:Y1+18,'text-anchor':'middle','font-size':11,fill:mu},v)})}
+ el('line',{x1:XC,x2:XC,y1:Y0,y2:Y1,stroke:mu,'stroke-width':1.5});el('line',{x1:X0,x2:X1,y1:Y1,y2:Y1,stroke:mu});
+ el('text',{x:(X0+XC)/2,y:Y1+38,'text-anchor':'middle','font-size':12,fill:'var(--icf)'},'← ICF volume (L)');el('text',{x:(XC+X1)/2,y:Y1+38,'text-anchor':'middle','font-size':12,fill:'var(--ecf)'},'ECF volume (L) →');
+ el('text',{x:XC+14,y:Y0-6,'text-anchor':'start','font-size':12,fill:mu},'Osmolarity (mOsm/L)');
+ // normal outlines
+ el('rect',{x:XC-N.vi*K,y:sy(N.oi),width:N.vi*K,height:Y1-sy(N.oi),fill:'none',stroke:fg,'stroke-width':3.5,'stroke-linecap':'round','stroke-dasharray':'0.1 8'});
+ el('rect',{x:XC,y:sy(N.oe),width:N.ve*K,height:Y1-sy(N.oe),fill:'none',stroke:fg,'stroke-width':3.5,'stroke-linecap':'round','stroke-dasharray':'0.1 8'});
+ // actual
+ var wi=S.vi*K,we=S.ve*K;
+ el('rect',{x:XC-wi,y:sy(S.oi),width:wi,height:Y1-sy(S.oi),fill:'var(--icf)','fill-opacity':.35,stroke:'var(--icf)','stroke-width':2});
+ el('rect',{x:XC,y:sy(S.oe),width:we,height:Y1-sy(S.oe),fill:'var(--ecf)','fill-opacity':.35,stroke:'var(--ecf)','stroke-width':2});
+ el('text',{x:XC-wi/2,y:Math.max(sy(S.oi)+20,Y0+14),'text-anchor':'middle','font-size':14,'font-weight':600,fill:'var(--icf)'},'ICF');
+ el('text',{x:XC+we/2,y:Math.max(sy(S.oe)+20,Y0+14),'text-anchor':'middle','font-size':14,'font-weight':600,fill:'var(--ecf)'},'ECF');
+ el('text',{x:XC-wi/2,y:Y1-8,'text-anchor':'middle','font-size':11,fill:fg},S.vi.toFixed(1)+' L');
+ el('text',{x:XC+we/2,y:Y1-8,'text-anchor':'middle','font-size':11,fill:fg},S.ve.toFixed(1)+' L');
+ // stats
+ var Oi=S.vi*S.oi,Oe=S.ve*S.oe,dO=S.oe-S.oi,msg;
+ if(Math.abs(dO)<1)msg='<span class="flow">Osmotic equilibrium: no net water movement.</span>';
+ else if(dO>0)msg='<span class="flow">ECF is hyperosmolar to ICF: water moves ICF → ECF (cells shrink).</span>';
+ else msg='<span class="flow">ECF is hypoosmolar to ICF: water moves ECF → ICF (cells swell).</span>';
+ document.getElementById('stats').innerHTML=msg+'<br>Total water <b>'+(S.vi+S.ve).toFixed(1)+' L</b> · ICF osmoles <b>'+Oi.toFixed(0)+'</b> mOsm · ECF osmoles <b>'+Oe.toFixed(0)+'</b> mOsm';
+ bloodUpdate();
+ [['vi','L'],['oi',''],['ve','L'],['oe','']].forEach(function(a){var k=a[0];document.getElementById(k).value=S[k];document.getElementById(k+'o').textContent=(k[0]=='v'?S[k].toFixed(1):Math.round(S[k]))+(k[0]=='v'?' L':' mOsm/L')});
+}
+['vi','oi','ve','oe'].forEach(function(k){document.getElementById(k).addEventListener('input',function(e){S[k]=parseFloat(e.target.value);draw()})});
+document.getElementById('reset').onclick=function(){S=Object.assign({},N);draw()};
+document.getElementById('eq').onclick=function(){
+ var Oi=S.vi*S.oi,Oe=S.ve*S.oe,V=S.vi+S.ve,o=(Oi+Oe)/V;
+ S.oi=S.oe=o;S.vi=Oi/o;S.ve=Oe/o;draw()};
+document.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){
+ var p=b.dataset.p,O=S.ve*S.oe;
+ if(p=='iso'){S.ve+=2}
+ else if(p=='water'){S.oe=O/(S.ve+2);S.ve+=2}
+ else if(p=='salt'){S.oe=(O+600)/S.ve}
+ else if(p=='diar'){S.ve=Math.max(2,S.ve-2)}
+ else if(p=='sweat'){var nv=Math.max(2,S.ve-1);S.oe=Math.min(400,O/nv);S.ve=nv}
+ draw()}});
+function equil(){var Oi=S.vi*S.oi,Oe=S.ve*S.oe,o=(Oi+Oe)/(S.vi+S.ve);S.oi=S.oe=o;S.vi=Oi/o;S.ve=Oe/o}
+function arrow(a,b,t){var d=(a-b)/b;return Math.abs(d)<t?'↔':(d>0?'↑':'↓')}
+var snap='',dn='';
+function bloodUpdate(){
+ var pv=0.55*S.ve/N.ve,rv=0.45*S.vi/N.vi,h=rv/(rv+pv)*100,p=7*N.ve/S.ve;
+ document.getElementById('bp').textContent=p.toFixed(1);
+ document.getElementById('bh').textContent=h.toFixed(1);
+ var c=[['ECF volume',arrow(S.ve,N.ve,.02)],['ICF volume',arrow(S.vi,N.vi,.02)],['ECF osmolarity',arrow(S.oe,N.oe,.007)],['Hematocrit',arrow(h,45,.015)],['Plasma protein',arrow(p,7,.02)]];
+ document.getElementById('chips').innerHTML=c.map(function(x){return '<span class="chip '+(x[1]=='↑'?'up':x[1]=='↓'?'dn':'')+'">'+x[0]+' <b>'+x[1]+'</b></span>'}).join('');
+ document.getElementById('dname').textContent=(snap==JSON.stringify(S))?dn:'';
+}
+var D={
+ diar:['Diarrhea: isosmotic volume contraction',function(){S.ve-=2}],
+ sweat:['Sweating / water deprivation: hyperosmotic volume contraction',function(){S.oe=S.ve*S.oe/(S.ve-1.5);S.ve-=1.5}],
+ adrenal:['Adrenal insufficiency: hyposmotic volume contraction',function(){S.oe=(S.ve*S.oe-600)/S.ve}],
+ isoexp:['Isotonic saline infusion: isosmotic volume expansion',function(){S.ve+=2}],
+ hyperexp:['High NaCl intake: hyperosmotic volume expansion',function(){S.oe=(S.ve*S.oe+600)/S.ve}],
+ siadh:['SIADH: hyposmotic volume expansion',function(){S.oe=S.ve*S.oe/(S.ve+2);S.ve+=2}]
+};
+document.querySelectorAll('[data-d]').forEach(function(b){b.onclick=function(){
+ var d=D[b.dataset.d];S=Object.assign({},N);d[1]();equil();dn=d[0];snap=JSON.stringify(S);draw()}});
+document.getElementById('eq').onclick=function(){equil();draw()};
+draw();
+</script>
+</body>
+</html>
